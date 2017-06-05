@@ -19,10 +19,10 @@
 add_action( 'add_meta_boxes', 'myplugin_add_custom_box' );
 function myplugin_add_custom_box() {
     if(get_current_blog_id() == 1)
-        return;
+        //return;
 
     add_meta_box(
-        'pppaaaa',
+        'posts push',
         "文章推送",
         'rk_posts_push_inner_custom_box',
         null, 'side','high'
@@ -47,6 +47,10 @@ function rk_posts_push_save_data($post_id) {
     if ( 'post' == $_POST['post_type'] ) {
         if ( ! current_user_can( 'publish_posts', $post_id ) )
             return;
+
+        if($_POST['rk_posts_p']) {
+            update_post_meta($post_id, '_rk_posts_push_value_key', 1);
+        }
     }
 
 }
