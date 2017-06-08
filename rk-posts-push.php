@@ -15,11 +15,13 @@
  * @copyright Copyright (c) 2011, Bill Erickson
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
+require_once ("lib/RkPostsPush.php");
 
 add_action( 'add_meta_boxes', 'myplugin_add_custom_box' );
 function myplugin_add_custom_box() {
-    if(get_current_blog_id() == 1)
-        //return;
+    // 不显示在主站和英文站点， 英文站点默认2
+    if(get_current_blog_id() < 3 ||  ! user_can(wp_get_current_user(), "publish_posts") )
+        return;
 
     add_meta_box(
         'posts push',
@@ -45,12 +47,22 @@ function rk_posts_push_save_data($post_id) {
         return;
 
     if ( 'post' == $_POST['post_type'] ) {
-        if ( ! current_user_can( 'publish_posts', $post_id ) )
+        if ( ! current_user_can( 'publish_posts', $post_id ) ){
             return;
+        }
 
         if($_POST['rk_posts_p']) {
+
             update_post_meta($post_id, '_rk_posts_push_value_key', 1);
+            $rkPPObj = new RkPostsPush(get_current_blog_id());
+            if($rkPPObj->pushPostToMasterSite($post_id)) {
+                echo "yes";
+            }else{
+                echo "no";
+            }
+
         }
     }
 
 }
+
