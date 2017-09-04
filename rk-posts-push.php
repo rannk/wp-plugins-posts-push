@@ -17,10 +17,27 @@
  */
 require_once ("lib/RkPostsPush.php");
 
+//插件启用时检测数据库
+register_activation_hook( __FILE__, 'posts_push_install');
+function posts_push_install() {
+    global $wpdb;
+    $sql = "CREATE TABLE IF NOT EXISTS `".$wpdb->base_prefix."rk_posts_push_records` (
+              `post_id` int(11) NOT NULL,
+              `current_site_id` int(11) NOT NULL,
+              `type` varchar(50) CHARACTER SET latin1 NOT NULL DEFAULT 'cn',
+              `master_post_id` int(11) NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+    $wpdb->query($sql);
+}
+
 add_action( 'add_meta_boxes', 'myplugin_add_custom_box' );
 function myplugin_add_custom_box() {
     // 不显示在主站和英文站点， 英文站点默认2
-    if(get_current_blog_id() < 3 ||  ! user_can(wp_get_current_user(), "publish_posts") )
+    if(get_current_blog_id() < 3 ||  ! user_can(wp_get_current_user(), "publish_posts"))
+        return;
+
+    $p_obj = get_post()->to_array();
+    if($p_obj['post_type'] != "post")
         return;
 
     add_meta_box(
